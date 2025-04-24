@@ -1,0 +1,179 @@
+/* -------------------- */
+/* Estilo global e da logo */
+/* -------------------- */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f3f3f3;
+  padding: 20px;
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.logo img {
+  display: inline-block;
+  width: 180px;
+  max-width: 100%;
+  height: auto;
+}
+
+/* -------------------- */
+/* Formulários (solicitacao, itens) */
+/* -------------------- */
+.formulario-container {
+  width: 90%;
+  max-width: 600px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+.formulario-container h1 { text-align: center; margin-bottom: 20px; font-size:24px; }
+.formulario-container label { display: block; margin-top:15px; font-weight: bold; }
+.formulario-container input { width:100%; padding:8px; margin-top:5px; box-sizing:border-box; }
+
+/* -------------------- */
+/* Botões gerais */
+/* -------------------- */
+.botao-adicionar {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  cursor: pointer;
+}
+.botao-adicionar:hover { background-color: #45a049; }
+
+/* -------------------- */
+/* Tela de Saída (tela.html) */
+/* -------------------- */
+.tela-container {
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+
+.tela-container h1 {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.lista-chamada {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lista-chamada li {
+  padding: 24px;
+  margin-bottom: 24px;
+  background: #f1f1f1;
+  border-radius: 12px;
+  font-size: 24px;
+  transition: background 0.3s;
+}
+
+/* Primeiro item com fundo amarelo piscando */
+.lista-chamada li.topo {
+  background: yellow;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+.item-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.item-main p {
+  margin: 8px 0;
+  font-size: 24px;
+}
+
+.item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item-details span {
+  display: inline-block;
+  color: blue;
+  font-size: 24px;
+}
+
+/* -------------------- */
+/* Dashboard: duas colunas lado a lado */
+/* -------------------- */
+.dashboard-title {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #333;
+}
+.dashboard-container {
+  border: 4px solid #000;
+  border-radius: 20px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 1200px;
+  background: #fff;
+}
+.columns-container { display:flex; gap:20px; }
+.list-column { flex:1; display:flex; flex-direction:column; }
+.list-column h3 { text-align:center; margin-bottom:15px; }
+.list-column ul { flex:1; overflow-y:auto; padding:0; margin:0; }
+.list-column li {
+  margin-bottom:12px;
+  padding:15px;
+  background:#fafafa;
+  border-radius:6px;
+  border:2px solid #ddd;
+  font-size:20px;
+}
+/* Container interno */
+.column-item { display:flex; justify-content:space-between; align-items:center; }
+/* Botão vermelho de remoção / devolução */
+.botao-remover {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-left: 12px;
+}
+.botao-remover:hover { background-color: #cc0000; }
+/* Checkbox “Entregue” */
+.reorder-form label {
+  color: #ff4d4d;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.reorder-form input[type="checkbox"] {
+  margin-right: 8px;
+  transform: scale(1.2);
+  cursor: pointer;
+}
