@@ -4,24 +4,23 @@
   <meta charset="UTF-8">
   <title>Tela de Saída Completa</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"
+          integrity="sha384-XZ4jVqpVlBvX1F2H3hLrX2+HmD+Q6Mfh9zYP+oyF8vnfX1KQUBhR2QLH8Uwz2Q6P"
+          crossorigin="anonymous"></script>
 </head>
 <body>
-
-  <!-- Logo no topo -->
   <div class="logo">
     <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
   </div>
-
   <div class="tela-container">
     <h1>Registros de Saída</h1>
-    <ul class="lista-chamada" id="lista-chamada"></ul>
+    <ul id="lista-chamada" class="lista-chamada"></ul>
   </div>
 
   <script>
-    // Atualiza automaticamente via SSE a cada novo item
     function atualizarTela() {
       fetch("{{ url_for('api_saidas') }}")
-        .then(res => res.json())
+        .then(r => r.json())
         .then(data => {
           const groups = {};
           data.forEach(item => {
@@ -29,17 +28,16 @@
             if (!groups[key]) groups[key] = { main: item, items: [] };
             groups[key].items.push(item);
           });
-          const groupsArr = Object.values(groups);
           let html = '';
-          groupsArr.forEach((group, idx) => {
+          Object.values(groups).forEach((group, idx) => {
             const cls = idx === 0 ? 'topo' : '';
             html += `<li class="${cls}">
                       <div class="item-container">
                         <div class="item-main">
                           <p><strong>Nome:</strong> ${group.main.nome}</p>
-                          <p><strong>Local para Utilização:</strong> ${group.main.observacao}</p>
+                          <p><strong>Local:</strong> ${group.main.observacao}</p>
                           <p><strong>Autorizado Por:</strong> ${group.main.responsavel}</p>
-                          <p><strong>Timestamp:</strong> ${group.main.timestamp}</p>
+                          <p><strong>Timestamp:</strong> ${new Date(group.main.timestamp).toLocaleTimeString()}</p>
                         </div>
                         <div class="item-details">`;
             group.items.forEach(it => {
@@ -53,11 +51,13 @@
         });
     }
 
-    // Inicia SSE
+    const socket = io();
+    socket.on('connect', () => console.log('WS conectado'));
+    socket.on('update', () => {
+      console.log('Evento update recebido');
+      atualizarTela();
+    });
     atualizarTela();
-    const source = new EventSource("{{ url_for('stream') }}");
-    source.onmessage = atualizarTela;
   </script>
-
 </body>
 </html>
