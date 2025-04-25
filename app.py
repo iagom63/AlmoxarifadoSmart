@@ -1,5 +1,3 @@
-```python
-# app.py
 import eventlet
 eventlet.monkey_patch()
 
@@ -11,14 +9,11 @@ import time
 import pandas as pd
 from io import BytesIO
 
-# Inicialização do Flask e Socket.IO com Eventlet
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 
 SAIDA_FILE = 'saida.json'
 saidas = []
-
-# Funções para carregar e salvar os registros
 
 def carregar_saidas():
     global saidas
@@ -82,7 +77,6 @@ def itens():
             }
             saidas.append(item)
         salvar_saidas()
-        # Emissão do evento para todos os clientes conectados
         socketio.emit('update', broadcast=True)
         return redirect(url_for('solicitacao'))
 
@@ -150,7 +144,4 @@ def exportar():
     )
 
 if __name__ == '__main__':
-    # Executa com Eventlet para suportar WebSockets
     socketio.run(app, debug=True, host='0.0.0.0')
-```
-
