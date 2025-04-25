@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard de Saída</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+  </div>
+  <h1 class="dashboard-title">Dashboard de Saída</h1>
+  <div class="dashboard-container">
+    <div class="columns-container">
+
+      <!-- Materiais -->
+      <div class="list-column">
+        <h3>Materiais</h3>
+        <ul>
+          {% for entry in materiais %}
+          <li>
+            <div class="column-item">
+              <div class="column-main">
+                <strong>{{ entry.item.nome }}</strong><br>
+                {{ entry.item.descricao }} — {{ entry.item.quantidade }} {{ entry.item.unidade }}<br>
+                <small>Autorizado Por: {{ entry.item.responsavel }}</small>
+              </div>
+              <form action="{{ url_for('remover', index=entry.index) }}" method="post">
+                <button class="botao-remover">Remover</button>
+              </form>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Equipamentos -->
+      <div class="list-column">
+        <h3>Equipamentos</h3>
+        <ul>
+          {% for entry in equipamentos %}
+          <li>
+            <div class="column-item">
+              <div class="column-main">
+                <strong>{{ entry.item.nome }}</strong><br>
+                {{ entry.item.descricao }} — {{ entry.item.quantidade }} {{ entry.item.unidade }}<br>
+                <small>Autorizado Por: {{ entry.item.responsavel }}</small>
+              </div>
+              <div class="column-actions">
+                <form action="{{ url_for('reordenar', index=entry.index) }}" method="post" class="reorder-form">
+                  <label><input type="checkbox" onchange="this.form.submit()" {% if entry.item.delivered %}checked{% endif %}> Entregue</label>
+                </form>
+                <form action="{{ url_for('remover', index=entry.index) }}" method="post">
+                  <button class="botao-remover">Devolvido</button>
+                </form>
+              </div>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
