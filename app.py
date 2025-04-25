@@ -1,31 +1,33 @@
-from flask import Flask, render_template, request, redirect, url_for, send_file, jsonify, Response
+from flask import Flask, render_template, request, redirect, url_for, send_file, jsonify
+from flask_socketio import SocketIO
 import json
 import os
 import time
 import pandas as pd
 from io import BytesIO
-import queue
 
 app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 SAIDA_FILE = 'saida.json'
 saidas = []
-event_queue = queue.Queue()
 
 def carregar_saidas():
     global saidas
     if os.path.exists(SAIDA_FILE):
         with open(SAIDA_FILE, 'r', encoding='utf-8') as f:
             try:
-                saidas.clear()
-                saidas.extend(json.load(f))
+                saidas = json.load(f)
             except json.JSONDecodeError:
-                saidas.clear()
+                saidas = []
+    else:
+        saidas = []
 
 def salvar_saidas():
     with open(SAIDA_FILE, 'w', encoding='utf-8') as f:
         json.dump(saidas, f, ensure_ascii=False, indent=2)
 
+# carrega ao iniciar
 carregar_saidas()
 
 @app.route('/')
@@ -72,8 +74,8 @@ def itens():
             }
             saidas.append(item)
         salvar_saidas()
-        event_queue.put('update')
-        return redirect(url_for('tela'))
+        socketio.emit('update')
+        return redirect(url_for('solicitacao'))
 
     return render_template(
         'itens.html',
@@ -83,26 +85,46 @@ def itens():
         count=count
     )
 
+@app.route('/dashboard')
+def dashboard():
+    materiais = []
+    equipamentos = []
+    for idx, item in enumerate(saidas):
+        if item['tipo'] == 'material':
+            materiais.append({'index': idx, 'item': item})
+        else:
+            equipamentos.append({'index': idx, 'item': item})
+    return render_template(
+        'dashboard.html',
+        materiais=materiais,
+        equipamentos=equipamentos
+    )
+
 @app.route('/remover/<int:index>', methods=['POST'])
 def remover(index):
     if 0 <= index < len(saidas):
         saidas.pop(index)
         salvar_saidas()
-        event_queue.put('update')
+        socketio.emit('update')
     return redirect(url_for('dashboard'))
 
 @app.route('/reordenar/<int:index>', methods=['POST'])
 def reordenar(index):
-    """
-    Marca como delivered e move o item para o fim da lista.
-    """
     if 0 <= index < len(saidas):
         item = saidas.pop(index)
         item['delivered'] = True
         saidas.append(item)
         salvar_saidas()
-        event_queue.put('update')
+        socketio.emit('update')
     return redirect(url_for('dashboard'))
+
+@app.route('/tela')
+def tela():
+    return render_template('tela.html')
+
+@app.route('/api/saidas')
+def api_saidas():
+    return jsonify(saidas)
 
 @app.route('/exportar')
 def exportar():
@@ -118,36 +140,6 @@ def exportar():
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-@app.route('/api/saidas')
-def api_saidas():
-    return jsonify(saidas)
-
-@app.route('/stream')
-def stream():
-    def event_stream():
-        while True:
-            event_queue.get()
-            yield 'data: update\n\n'
-    return Response(event_stream(), mimetype='text/event-stream')
-
-@app.route('/tela')
-def tela():
-    return render_template('tela.html', saidas=saidas)
-
-@app.route('/dashboard')
-def dashboard():
-    materiais = []
-    equipamentos = []
-    for idx, item in enumerate(saidas):
-        if item.get('tipo') == 'material':
-            materiais.append({'index': idx, 'item': item})
-        elif item.get('tipo') == 'equipamento':
-            equipamentos.append({'index': idx, 'item': item})
-    return render_template(
-        'dashboard.html',
-        materiais=materiais,
-        equipamentos=equipamentos
-    )
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    # usa SocketIO para websockets; Eventlet habilita concurrency
+    socketio.run(app, debug=True, host='0.0.0.0')
