@@ -1,3 +1,8 @@
+```python
+# app.py
+import eventlet
+eventlet.monkey_patch()
+
 from flask import Flask, render_template, request, redirect, url_for, send_file, jsonify
 from flask_socketio import SocketIO
 import json
@@ -6,11 +11,14 @@ import time
 import pandas as pd
 from io import BytesIO
 
+# Inicialização do Flask e Socket.IO com Eventlet
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 SAIDA_FILE = 'saida.json'
 saidas = []
+
+# Funções para carregar e salvar os registros
 
 def carregar_saidas():
     global saidas
@@ -27,7 +35,7 @@ def salvar_saidas():
     with open(SAIDA_FILE, 'w', encoding='utf-8') as f:
         json.dump(saidas, f, ensure_ascii=False, indent=2)
 
-# carrega ao iniciar
+# Carrega registros ao iniciar
 carregar_saidas()
 
 @app.route('/')
@@ -74,7 +82,8 @@ def itens():
             }
             saidas.append(item)
         salvar_saidas()
-        socketio.emit('update')
+        # Emissão do evento para todos os clientes conectados
+        socketio.emit('update', broadcast=True)
         return redirect(url_for('solicitacao'))
 
     return render_template(
@@ -105,7 +114,7 @@ def remover(index):
     if 0 <= index < len(saidas):
         saidas.pop(index)
         salvar_saidas()
-        socketio.emit('update')
+        socketio.emit('update', broadcast=True)
     return redirect(url_for('dashboard'))
 
 @app.route('/reordenar/<int:index>', methods=['POST'])
@@ -115,7 +124,7 @@ def reordenar(index):
         item['delivered'] = True
         saidas.append(item)
         salvar_saidas()
-        socketio.emit('update')
+        socketio.emit('update', broadcast=True)
     return redirect(url_for('dashboard'))
 
 @app.route('/tela')
@@ -141,5 +150,7 @@ def exportar():
     )
 
 if __name__ == '__main__':
-    # usa SocketIO para websockets; Eventlet habilita concurrency
+    # Executa com Eventlet para suportar WebSockets
     socketio.run(app, debug=True, host='0.0.0.0')
+```
+
