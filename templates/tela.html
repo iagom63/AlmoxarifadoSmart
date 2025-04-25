@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Tela de Saída Completa</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"
           integrity="sha384-XZ4jVqpVlBvX1F2H3hLrX2+HmD+Q6Mfh9zYP+oyF8vnfX1KQUBhR2QLH8Uwz2Q6P"
           crossorigin="anonymous"></script>
 </head>
 <body>
   <div class="logo">
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" />
   </div>
+
   <div class="tela-container">
     <h1>Registros de Saída</h1>
     <ul id="lista-chamada" class="lista-chamada"></ul>
@@ -32,31 +33,35 @@
           Object.values(groups).forEach((group, idx) => {
             const cls = idx === 0 ? 'topo' : '';
             html += `<li class="${cls}">
-                      <div class="item-container">
-                        <div class="item-main">
-                          <p><strong>Nome:</strong> ${group.main.nome}</p>
-                          <p><strong>Local:</strong> ${group.main.observacao}</p>
-                          <p><strong>Autorizado Por:</strong> ${group.main.responsavel}</p>
-                          <p><strong>Timestamp:</strong> ${new Date(group.main.timestamp).toLocaleTimeString()}</p>
-                        </div>
-                        <div class="item-details">`;
-            group.items.forEach(it => {
-              html += `<span><strong>${it.tipo}</strong> – ${it.descricao} – ${it.quantidade} ${it.unidade}</span>`;
-            });
+                       <div class="item-container">
+                         <div class="item-main">
+                           <p><strong>Nome:</strong> ${group.main.nome}</p>
+                           <p><strong>Local:</strong> ${group.main.observacao}</p>
+                           <p><strong>Autorizado Por:</strong> ${group.main.responsavel}</p>
+                           <p><strong>Hora:</strong> ${new Date(group.main.timestamp).toLocaleTimeString()}</p>
+                         </div>
+                         <div class="item-details">`;
+            group.items.forEach(it =>
+              html += `<span><strong>${it.tipo}</strong> – ${it.descricao} – ${it.quantidade} ${it.unidade}</span>`
+            );
             html += `   </div>
-                      </div>
-                    </li>`;
+                       </div>
+                     </li>`;
           });
           document.getElementById('lista-chamada').innerHTML = html;
-        });
+        })
+        .catch(console.error);
     }
 
     const socket = io();
-    socket.on('connect', () => console.log('WS conectado'));
+    socket.on('connect', () => console.log('WebSocket conectado!'));
     socket.on('update', () => {
-      console.log('Evento update recebido');
+      console.log('Update recebido via WS');
       atualizarTela();
     });
+    socket.on('disconnect', () => console.warn('WS desconectado'));
+
+    // primeira renderização
     atualizarTela();
   </script>
 </body>
