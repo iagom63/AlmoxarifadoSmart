@@ -1,6 +1,6 @@
 Flask
 flask-socketio
+eventlet
 pandas
 openpyxl
 gunicorn
-eventlet
